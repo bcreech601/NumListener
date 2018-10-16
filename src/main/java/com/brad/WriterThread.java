@@ -4,6 +4,7 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 
 class WriterThread implements Runnable {
@@ -17,16 +18,7 @@ class WriterThread implements Runnable {
     BloomFilter<String> duplicationFilter = BloomFilter.create(new Funnel<String>() {
         @Override
         public void funnel(String number, PrimitiveSink into) {
-            into.putChar(number.toCharArray()[0])
-            .putChar(number.toCharArray()[1])
-            .putChar(number.toCharArray()[2])
-            .putChar(number.toCharArray()[3])
-            .putChar(number.toCharArray()[4])
-            .putChar(number.toCharArray()[5])
-            .putChar(number.toCharArray()[6])
-            .putChar(number.toCharArray()[7])
-            .putChar(number.toCharArray()[8]);
-
+            into.putString(number, Charset.defaultCharset());
         }
     }, 999999999, 0.01);
 
@@ -54,6 +46,7 @@ class WriterThread implements Runnable {
                     }
                 }
                 else{
+                    duplicateMap.remove(number);
                     threadContext.trafficReport.incrementRecieved();
                 }
 
