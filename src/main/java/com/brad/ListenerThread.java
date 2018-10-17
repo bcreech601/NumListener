@@ -3,9 +3,7 @@ package com.brad;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,12 +12,12 @@ class ListenerThread implements Runnable {
 
     private String name;
     private final Thread t;
-    private final ThreadContext ctx;
+    private final ApplicationContext applicationContext;
     private final Pattern pattern;
 
-    ListenerThread( String threadname, ThreadContext ctx){
+    ListenerThread( String threadname, ApplicationContext ctx){
         name = threadname;
-        this.ctx = ctx;
+        this.applicationContext = ctx;
 
         pattern = Pattern.compile("[0-9]{9,9}");
         t = new Thread(this, name);
@@ -31,22 +29,21 @@ class ListenerThread implements Runnable {
 
         try {
             while( true ) {
-                Socket clientSock = ctx.socket.accept();
+                Socket clientSock = applicationContext.socket.accept();
+                String inputLine;
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
 
-                String inputLine;
-
+                // read from socket
                 while ((inputLine = in.readLine()) != null ) {
-                    if( inputLine.equals("terminate") ){
-                        ctx.terminate();
+                    if( inputLine.equals("terminate") ){ // check for magic string
+                        applicationContext.terminate();
                     }
                     else {
                         Matcher m = pattern.matcher(inputLine);
-                        if (inputLine.length() == 9 && m.find()  && ! Thread.currentThread().isInterrupted() ) {
-                            ctx.queue.add(inputLine);
+                        if (inputLine.length() == 9 && m.find()  && ! Thread.currentThread().isInterrupted() ) { //properly formed message
+                            applicationContext.queue.add(inputLine);
                         } else {
-                            // string does not conform, ditch connection
-                            clientSock.close();
+                            clientSock.close(); // string does not conform, ditch connection
                             break;
                         }
                     }
@@ -54,9 +51,6 @@ class ListenerThread implements Runnable {
             }
         }
         catch(IOException e){
-            System.out.println(name + "io exception");
         }
-
-        System.out.println(name + " exiting.");
     }
 }

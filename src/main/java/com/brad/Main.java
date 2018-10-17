@@ -1,41 +1,43 @@
 package com.brad;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.hash.BloomFilter;
-import com.google.common.hash.Funnel;
-import com.google.common.hash.PrimitiveSink;
-
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.nio.charset.Charset;
-import java.util.HashMap;
 
 
 public class Main {
 
+    private static ApplicationContext applicationContext;
+
+    private static void createListeners(Integer count){
+        for( Integer i = 0 ; i < count; ++i ){
+            new ListenerThread(i.toString(), applicationContext);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
 
-        ThreadContext ctx = new ThreadContext(new ServerSocket(4000));
+        ServerSocket serverSocket = new ServerSocket(4000);
+        applicationContext = new ApplicationContext(serverSocket);
 
-        new WriterThread( "writer", ctx);
+        new WriterThread( "writer", applicationContext);
 
-        new ListenerThread("1", ctx);
-        new ListenerThread("2", ctx );
-        new ListenerThread("3", ctx );
-        new ListenerThread("4", ctx );
-        new ListenerThread("5", ctx );
+        createListeners(Integer.parseInt( applicationContext.appProps.getProperty("NumberOfListeners")));
 
         try {
-            while( true ) {
+            while( ! applicationContext.isTerminateCalled() ) {
                 Thread.sleep(1000 * 10);
 
-                ctx.trafficReport.emitReport();
+                applicationContext.trafficReport.emitReport();
             }
+
+            serverSocket.close(); //  socketexception out of accept in listener threads
+
+            for ( Thread thread: applicationContext.threadList ){ //if exiting from the join on all threads
+                thread.join();
+            }
+
         } catch (InterruptedException e) {
-            System.out.println("Main thread Interrupted");
+
         }
-
-        System.out.println("Main thread exiting.");
-
     }
 }

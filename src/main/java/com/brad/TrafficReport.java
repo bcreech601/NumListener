@@ -12,7 +12,6 @@ TrafficReport {
 
     }
 
-
     public synchronized void incrementDuplicate(){
         ++ duplicates;
     }
