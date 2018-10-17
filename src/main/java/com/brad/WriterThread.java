@@ -13,47 +13,34 @@ class WriterThread implements Runnable {
     ThreadContext threadContext;
 
     private final Thread t;
-    private final HashMap<String, Integer> duplicateMap = new HashMap<String, Integer>();
+    private final boolean[] duplicateArray = new boolean[999999999 + 1];
 
-    BloomFilter<String> duplicationFilter = BloomFilter.create(new Funnel<String>() {
-        @Override
-        public void funnel(String number, PrimitiveSink into) {
-            into.putString(number, Charset.defaultCharset());
-        }
-    }, 999999999, 0.01);
 
-    WriterThread( String threadname, ThreadContext ctx){
+    WriterThread(String threadname, ThreadContext ctx) {
         name = threadname;
         this.threadContext = ctx;
+
+        for ( Integer i = 0 ; i < 999999 + 1; ++ i )
+            duplicateArray[i] =false;
 
         t = new Thread(this, name);
         t.start();
     }
 
     public void run() {
-        while( true ){
+        while (true) {
             String number = threadContext.queue.poll();
-            if( number != null) {
-
-                if( duplicationFilter.mightContain(number) ){
-
-                    if( duplicateMap.containsKey(number) ) {
-                        threadContext.trafficReport.incrementDuplicate();
-                    }
-                    else{
-                        threadContext.trafficReport.incrementRecieved();
-                        duplicateMap.put(number,1);
-                    }
-                }
-                else{
-                    duplicateMap.remove(number);
+            if (number != null) {
+                if (duplicateArray[Integer.parseInt(number)]) {
+                    threadContext.trafficReport.incrementDuplicate();
+                } else {
                     threadContext.trafficReport.incrementRecieved();
+                    duplicateArray[Integer.parseInt(number)] = true;
                 }
-
-                duplicationFilter.put(number);
             }
         }
-
     }
+
 }
+
 

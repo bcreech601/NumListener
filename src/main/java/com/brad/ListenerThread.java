@@ -43,8 +43,6 @@ class ListenerThread implements Runnable {
                     else {
                         Matcher m = pattern.matcher(inputLine);
                         if (inputLine.length() == 9 && m.find()  && ! Thread.currentThread().isInterrupted() ) {
-                            //enqueue
-                            ctx.trafficReport.incrementTotal();
                             ctx.queue.add(inputLine);
                         } else {
                             // string does not conform, ditch connection
