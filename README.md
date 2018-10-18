@@ -4,6 +4,7 @@ Unique Nine Digin Number Aggregator
 =======================================
 
 A server process to receive and aggregate unique carriage return delimited 9 digit numbers sent from clients with TCP connection to port 4000 on the host macine 
+The system is designed as a set of five listener threads, a writer thread and a main thread to provide periodic status reports communicating via a shared application context object. 
 
 Maximum of 5 concurrent connections.
 
