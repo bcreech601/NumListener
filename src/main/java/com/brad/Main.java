@@ -21,7 +21,7 @@ public class Main {
 
         new WriterThread( "writer", applicationContext);
 
-        createListeners(Integer.parseInt( applicationContext.appProps.getProperty("NumberOfListeners")));
+        createListeners(5);
 
         try {
             while( ! applicationContext.isTerminateCalled() ) {

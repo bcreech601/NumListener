@@ -4,17 +4,12 @@ class WriterThread implements Runnable {
 
     String name;
     ApplicationContext applicationContext;
-
+    private final DedupeStrategy dedupeStrategy = new DedupeStrategy();
     private final Thread t;
-    private final boolean[] duplicateArray = new boolean[999999999 + 1];
-
 
     WriterThread(String threadname, ApplicationContext ctx) {
         name = threadname;
         this.applicationContext = ctx;
-
-        for ( Integer i = 0 ; i < 999999 + 1; ++ i )
-            duplicateArray[i] =false;
 
         t = new Thread(this, name);
         applicationContext.registerThread(t);
@@ -26,11 +21,11 @@ class WriterThread implements Runnable {
         while (! Thread.currentThread().isInterrupted() ) {
             String number = applicationContext.queue.poll();
             if (number != null) {
-                if (duplicateArray[Integer.parseInt(number)]) {
+                if (dedupeStrategy.isDuplicate(number)) {
                     applicationContext.trafficReport.incrementDuplicate();
                 } else {
                     applicationContext.trafficReport.incrementRecieved();
-                    duplicateArray[Integer.parseInt(number)] = true;
+                    dedupeStrategy.addKey(number);
                 }
             }
         }

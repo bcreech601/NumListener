@@ -18,10 +18,6 @@ public class ApplicationContext
     public List<Thread> threadList = new ArrayList<Thread>();
     public final com.brad.TrafficReport trafficReport = new com.brad.TrafficReport();
     private boolean terminateCalled = false;
-    private String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-    private final String appConfigPath = rootPath + "config.properties";
-
-    Properties appProps = new Properties();
 
     void registerThread(Thread thread){
         threadList.add(thread);
@@ -36,11 +32,7 @@ public class ApplicationContext
     }
 
     ApplicationContext(ServerSocket sock) throws FileNotFoundException, IOException{
-
         socket = sock;
-
-        appProps = new Properties();
-        appProps.load(new FileInputStream(appConfigPath));
     }
 
     public boolean isTerminateCalled(){

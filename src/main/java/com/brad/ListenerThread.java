@@ -13,13 +13,12 @@ class ListenerThread implements Runnable {
     private String name;
     private final Thread t;
     private final ApplicationContext applicationContext;
-    private final Pattern pattern;
+    private final NumberInputProtocol numberInputProtocol = new NumberInputProtocol();
 
     ListenerThread( String threadname, ApplicationContext ctx){
         name = threadname;
         this.applicationContext = ctx;
 
-        pattern = Pattern.compile("[0-9]{9,9}");
         t = new Thread(this, name);
         ctx.registerThread(t);
         t.start();
@@ -35,12 +34,12 @@ class ListenerThread implements Runnable {
 
                 // read from socket
                 while ((inputLine = in.readLine()) != null ) {
-                    if( inputLine.equals("terminate") ){ // check for magic string
+                    if( numberInputProtocol.isTerminateInput(inputLine) ){ // check for termination
                         applicationContext.terminate();
                     }
                     else {
-                        Matcher m = pattern.matcher(inputLine);
-                        if (inputLine.length() == 9 && m.find()  && ! Thread.currentThread().isInterrupted() ) { //properly formed message
+                        ;
+                        if ( numberInputProtocol.isValidInput(inputLine) && ! Thread.currentThread().isInterrupted() ) { //properly formed message
                             applicationContext.queue.add(inputLine);
                         } else {
                             clientSock.close(); // string does not conform, ditch connection
