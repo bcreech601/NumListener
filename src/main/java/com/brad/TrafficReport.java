@@ -1,14 +1,12 @@
 package com.brad;
 
-public class
-
-TrafficReport {
+public class TrafficReport {
 
     private long recieved;
     private long duplicates;
     private long total;
 
-    TrafficReport(){
+    public TrafficReport(){
 
     }
 
@@ -19,6 +17,14 @@ TrafficReport {
     public synchronized void incrementRecieved(){
         ++ recieved;
         ++ total;
+    }
+
+    public Long getRecieved(){
+        return recieved;
+    }
+
+    public Long getDuplicates(){
+        return duplicates;
     }
 
     public synchronized Long getTotal(){
